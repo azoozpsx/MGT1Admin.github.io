@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<!--
+    ===================================================
+    ملف: admin/login.html
+    الوصف: صفحة تسجيل الدخول للوحة التحكم
+
+    للباك اند:
+    - هذه الصفحة تُرسل بيانات تسجيل الدخول إلى:
+      POST /api/admin/login
+      البيانات: { email: "...", password: "..." }
+      الاستجابة: { token: "...", user: {...} }
+
+    - عند النجاح: احفظ الـ token في localStorage
+      وحوّل المستخدم إلى: /admin/dashboard.html
+
+    - عند الفشل: أظهر رسالة خطأ مناسبة
+
+    - حماية: إذا كان المستخدم مسجلاً دخوله بالفعل،
+      حوّله مباشرة للداش بورد
+
+    - في Laravel: Route::post('/api/admin/login', [AdminAuthController::class, 'login']);
+    ===================================================
+-->
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل الدخول | لوحة التحكم - المشعبة لمنظومات الطاقة الشمسية</title>
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ==========================================
+           إعدادات صفحة تسجيل الدخول
+           ========================================== */
+        :root {
+            --primary: #af101a;
+            --primary-dark: #8a0c15;
+            --primary-light: rgba(175, 16, 26, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { direction: rtl; }
+
+        body {
+            font-family: 'IBM Plex Sans Arabic', 'Manrope', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ==========================================
+           الشاشة مقسومة: يسار صورة، يمين نموذج
+           ========================================== */
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, #0f1117 0%, #1a0305 60%, #2d0608 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* دوائر زخرفية خلفية */
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(175,16,26,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-left::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(175,16,26,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* شعار الجانب الأيسر */
+        .login-brand {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-brand-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-brand-icon .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .login-brand-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .login-brand-sub {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* المحتوى المنتصف للجانب الأيسر */
+        .login-left-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-left-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .login-left-title span { color: var(--primary); }
+
+        .login-left-desc {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.7;
+            max-width: 380px;
+            margin-bottom: 2.5rem;
+        }
+
+        /* إحصائيات صغيرة */
+        .login-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            max-width: 380px;
+        }
+
+        .login-stat {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .login-stat-num {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+        }
+
+        .login-stat-label {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 0.2rem;
+            display: block;
+        }
+
+        /* الرسالة الأمنية في الأسفل */
+        .login-security-note {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-security-note .material-symbols-outlined {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        }
+
+        /* ==========================================
+           الجانب الأيمن - نموذج تسجيل الدخول
+           ========================================== */
+        .login-right {
+            width: 460px;
+            min-width: 460px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+        }
+
+        .login-form-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-welcome {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 0.35rem;
+        }
+
+        .login-sub {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* حقول الإدخال */
+        .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
+
+        .login-field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+        .login-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .login-input-wrapper {
+            position: relative;
+        }
+
+        .login-input-icon {
+            position: absolute;
+            right: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem !important;
+            color: #9ca3af;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            pointer-events: none;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.75rem 2.75rem 0.75rem 3rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #111827;
+            background: #fafafa;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .login-input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(175,16,26,0.1);
+        }
+
+        .login-input-toggle {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .login-input-toggle:hover { color: var(--primary); }
+
+        .login-input-toggle .material-symbols-outlined { font-size: 1.1rem; }
+
+        /* صف "تذكرني" + "نسيت كلمة المرور" */
+        .login-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .login-remember {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .login-remember input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .login-remember-label {
+            font-size: 0.82rem;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .login-forgot {
+            font-size: 0.82rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .login-forgot:hover { opacity: 0.75; }
+
+        /* زر تسجيل الدخول */
+        .login-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 8px 24px rgba(175,16,26,0.3);
+        }
+
+        .login-btn:active { transform: scale(0.98); }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* رسالة خطأ */
+        .login-error-msg {
+            display: none;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: #dc2626;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .login-error-msg.visible { display: block; }
+
+        /* رسالة نجاح */
+        .login-success-msg {
+            display: none;
+            background: rgba(16,185,129,0.08);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: #059669;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .login-success-msg.visible { display: block; }
+
+        /* Divider */
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #d1d5db;
+            font-size: 0.75rem;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        /* رابط الرجوع للموقع */
+        .login-back-site {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            color: #6b7280;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            transition: color 0.2s;
+            justify-content: center;
+        }
+
+        .login-back-site:hover { color: var(--primary); }
+
+        .login-back-site .material-symbols-outlined { font-size: 0.95rem; }
+
+        /* تحميل */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        .login-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ==========================================
+           تصميم متجاوب للهاتف
+           ========================================== */
+        @media (max-width: 960px) {
+            body { flex-direction: column; overflow: auto; }
+            .login-left { display: none; }
+            .login-right { width: 100%; min-width: unset; justify-content: flex-start; padding-top: 2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .login-right { padding: 1.5rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ==========================================
+     الجانب الأيسر - الزخرفة والمعلومات
+     ========================================== -->
+<div class="login-left">
+
+    <!-- الشعار -->
+    <div class="login-brand">
+        <div class="login-brand-logo">
+            <div class="login-brand-icon">
+                <span class="material-symbols-outlined">wb_sunny</span>
+            </div>
+            <div>
+                <div class="login-brand-name">المشعبة لمنظومات الطاقة الشمسية</div>
+                <div class="login-brand-sub">لوحة التحكم الإدارية</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="login-left-content">
+        <h1 class="login-left-title">
+            إدارة موقعك<br />
+            بكل <span>سهولة ودقة</span>
+        </h1>
+        <p class="login-left-desc">
+            لوحة تحكم متكاملة تُمكّنك من إدارة المنتجات،
+            الباقات، الفريق، ورسائل العملاء من مكان واحد.
+        </p>
+
+        <!-- إحصائيات سريعة -->
+        <!-- للباك اند: تُجلب من GET /api/admin/stats -->
+        <div class="login-stats">
+            <div class="login-stat">
+                <span class="login-stat-num">+150</span>
+                <span class="login-stat-label">مشروع منجز</span>
+            </div>
+            <div class="login-stat">
+                <span class="login-stat-num">98%</span>
+                <span class="login-stat-label">رضا العملاء</span>
+            </div>
+            <div class="login-stat">
+                <span class="login-stat-num">25</span>
+                <span class="login-stat-label">سنة ضمان</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ملاحظة أمنية -->
+    <div class="login-security-note">
+        <span class="material-symbols-outlined">lock</span>
+        منطقة محمية - للمشرفين المعتمدين فقط
+    </div>
+</div>
+
+
+<!-- ==========================================
+     الجانب الأيمن - نموذج تسجيل الدخول
+     ========================================== -->
+<div class="login-right">
+    <div class="login-form-header">
+        <p class="login-welcome">لوحة التحكم</p>
+        <h2 class="login-title">مرحباً بعودتك 👋</h2>
+        <p class="login-sub">سجّل دخولك للوصول إلى لوحة إدارة الموقع</p>
+    </div>
+
+    <!-- رسالة الخطأ -->
+    <div id="login-error" class="login-error-msg" role="alert">
+        ❌ البريد الإلكتروني أو كلمة المرور غير صحيحة
+    </div>
+
+    <!-- رسالة النجاح -->
+    <div id="login-success" class="login-success-msg" role="status">
+        ✅ تسجيل الدخول ناجح، جارٍ التحويل...
+    </div>
+
+    <!--
+        نموذج تسجيل الدخول
+        للباك اند: يُرسل إلى POST /api/admin/login
+        الحقول: { email, password, remember }
+        الاستجابة: { success: bool, token, user: { name, role } }
+    -->
+    <form id="login-form" class="login-form" novalidate autocomplete="off">
+
+        <!-- البريد الإلكتروني -->
+        <div class="login-field">
+            <label class="login-label" for="login-email">البريد الإلكتروني</label>
+            <div class="login-input-wrapper">
+                <span class="material-symbols-outlined login-input-icon">mail</span>
+                <input type="email"
+                       id="login-email"
+                       name="email"
+                       class="login-input"
+                       placeholder="admin@mashaba.com"
+                       dir="ltr"
+                       autocomplete="email"
+                       required
+                       aria-required="true" />
+            </div>
+        </div>
+
+        <!-- كلمة المرور -->
+        <div class="login-field">
+            <label class="login-label" for="login-password">كلمة المرور</label>
+            <div class="login-input-wrapper">
+                <span class="material-symbols-outlined login-input-icon">lock</span>
+                <input type="password"
+                       id="login-password"
+                       name="password"
+                       class="login-input"
+                       placeholder="••••••••••"
+                       dir="ltr"
+                       autocomplete="current-password"
+                       required
+                       aria-required="true" />
+                <!-- زر إظهار/إخفاء كلمة المرور -->
+                <button type="button"
+                        class="login-input-toggle"
+                        id="toggle-password"
+                        aria-label="إظهار/إخفاء كلمة المرور">
+                    <span class="material-symbols-outlined" id="toggle-icon">visibility_off</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- تذكرني + نسيت كلمة المرور -->
+        <div class="login-options">
+            <label class="login-remember">
+                <input type="checkbox" id="remember-me" name="remember" />
+                <span class="login-remember-label">تذكرني</span>
+            </label>
+            <!--
+                للباك اند: ربط بصفحة إعادة تعيين كلمة المرور
+                POST /api/admin/forgot-password { email }
+            -->
+            <a href="#" class="login-forgot">نسيت كلمة المرور؟</a>
+        </div>
+
+        <!-- زر تسجيل الدخول -->
+        <button type="submit" class="login-btn" id="login-submit-btn">
+            <span class="material-symbols-outlined" style="font-size:1.1rem">login</span>
+            تسجيل الدخول
+        </button>
+
+    </form>
+
+    <!-- الرجوع للموقع -->
+    <a href="../index.html" class="login-back-site">
+        <span class="material-symbols-outlined">arrow_forward</span>
+        العودة إلى الموقع الرئيسي
+    </a>
+</div>
+
+
+<!-- JavaScript -->
+<script>
+    /**
+     * منطق تسجيل الدخول
+     * للباك اند: استبدل simulateLogin() بطلب API حقيقي
+     */
+    'use strict';
+
+    /* ==========================================
+       تهيئة الصفحة
+       ========================================== */
+    document.addEventListener('DOMContentLoaded', function() {
+        /**
+         * للباك اند: إذا كان المستخدم مسجلاً دخوله بالفعل،
+         *            حوّله مباشرة للداش بورد
+         */
+        const savedToken = localStorage.getItem('admin_token');
+        if (savedToken) {
+            window.location.href = 'page/dashboard.html';
+            return;
+        }
+
+        initLoginForm();
+        initPasswordToggle();
+    });
+
+    /* ==========================================
+       نموذج تسجيل الدخول
+       ========================================== */
+    function initLoginForm() {
+        const form = document.getElementById('login-form');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email    = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const remember = document.getElementById('remember-me').checked;
+
+            // التحقق من الإدخال
+            if (!email || !password) {
+                showError('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('يرجى إدخال بريد إلكتروني صحيح');
+                return;
+            }
+
+            // تفعيل حالة التحميل
+            setLoading(true);
+
+            try {
+                /**
+                 * للباك اند: استبدل هذا بطلب API حقيقي:
+                 *
+                 * const response = await fetch('/api/admin/login', {
+                 *     method: 'POST',
+                 *     headers: {
+                 *         'Content-Type': 'application/json',
+                 *         'Accept': 'application/json',
+                 *         // 'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content
+                 *     },
+                 *     body: JSON.stringify({ email, password, remember })
+                 * });
+                 *
+                 * const data = await response.json();
+                 *
+                 * if (response.ok && data.token) {
+                 *     handleLoginSuccess(data.token, data.user, remember);
+                 * } else {
+                 *     showError(data.message || 'بيانات غير صحيحة');
+                 * }
+                 */
+
+                // === محاكاة تسجيل الدخول (تُحذف عند ربط API) ===
+                await simulateLogin(email, password, remember);
+                // =================================================
+
+            } catch (error) {
+                showError('خطأ في الاتصال بالسيرفر، حاول مرة أخرى');
+            } finally {
+                setLoading(false);
+            }
+        });
+    }
+
+    /**
+     * محاكاة تسجيل الدخول
+     * للباك اند: احذف هذه الدالة واستبدلها بطلب API
+     * بيانات الدخول للتجربة: admin@mashaba.com / password123
+     */
+    function simulateLogin(email, password, remember) {
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                // بيانات افتراضية للتجربة
+                if (email === 'admin@mashaba.com' && password === 'password123') {
+                    const fakeToken = 'fake_admin_token_' + Date.now();
+                    const fakeUser = {
+                        id: 1,
+                        name: 'مدير النظام',
+                        email: email,
+                        role: 'super_admin'
+                    };
+                    handleLoginSuccess(fakeToken, fakeUser, remember);
+                    resolve();
+                } else {
+                    showError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+                    resolve(); // نحل الوعد لإيقاف التحميل
+                }
+            }, 1200);
+        });
+    }
+
+    /**
+     * معالجة نجاح تسجيل الدخول
+     * للباك اند: احفظ الـ token والمستخدم وحوّل للداش بورد
+     */
+    function handleLoginSuccess(token, user, remember) {
+        // حفظ الـ token
+        if (remember) {
+            localStorage.setItem('admin_token', token);
+            localStorage.setItem('admin_user', JSON.stringify(user));
+        } else {
+            sessionStorage.setItem('admin_token', token);
+            sessionStorage.setItem('admin_user', JSON.stringify(user));
+        }
+
+        // إظهار رسالة النجاح
+        hideError();
+        document.getElementById('login-success').classList.add('visible');
+
+        // التحويل للداش بورد
+        setTimeout(function() {
+            window.location.href = 'page/dashboard.html';
+        }, 1000);
+    }
+
+    /* ==========================================
+       إظهار/إخفاء كلمة المرور
+       ========================================== */
+    function initPasswordToggle() {
+        const toggleBtn  = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('login-password');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        if (!toggleBtn) return;
+
+        toggleBtn.addEventListener('click', function() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
+        });
+    }
+
+    /* ==========================================
+       دوال مساعدة
+       ========================================== */
+    function setLoading(isLoading) {
+        const btn = document.getElementById('login-submit-btn');
+        if (!btn) return;
+
+        if (isLoading) {
+            btn.disabled = true;
+            btn.innerHTML = '<div class="login-spinner"></div> جارٍ التحقق...';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem">login</span> تسجيل الدخول';
+        }
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('login-error');
+        if (el) {
+            el.textContent = '❌ ' + msg;
+            el.classList.add('visible');
+        }
+    }
+
+    function hideError() {
+        const el = document.getElementById('login-error');
+        if (el) el.classList.remove('visible');
+    }
+</script>
+
+</body>
+</html>
