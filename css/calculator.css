@@ -1,0 +1,469 @@
+/**
+ * ===================================================
+ * ملف: calculator.css
+ * الوصف: أنماط خاصة بصفحة الحاسبة (calculator.html)
+ *
+ * للباك اند:
+ * - هذه الصفحة هي الأهم تقنياً في الموقع
+ * - المنطق: المستخدم يختار أجهزته المنزلية
+ *           وساعات التشغيل والمنطقة، ثم
+ *           تُحسب احتياجاته من الطاقة الشمسية
+ *
+ * نقاط API المتوقعة:
+ *   GET  /api/appliances          - جلب قائمة الأجهزة مع استهلاكها بالواط
+ *   GET  /api/regions             - جلب المناطق مع معامل الإشعاع الشمسي
+ *   POST /api/calculate           - إرسال بيانات الحساب والحصول على التوصية
+ *                                   البيانات المُرسلة:
+ *                                     { appliances: [{id, qty}], hours, region_id }
+ *                                   البيانات المُستلمة:
+ *                                     { panels, batteries, recommended_system_id,
+ *                                       daily_kwh, monthly_savings }
+ *   GET  /api/products/{id}       - جلب تفاصيل النظام الموصى به
+ * ===================================================
+ */
+
+/* ==========================================
+   1. بطاقات اختيار الأجهزة
+   للباك اند: كل بطاقة جهاز تحتوي على data-id
+              و data-watt للاستخدام في الحساب
+   ========================================== */
+.appliance-card {
+    background: var(--color-surface);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: background var(--transition-fast),
+                border var(--transition-fast),
+                box-shadow var(--transition-fast);
+
+    /* الحدود الافتراضية */
+    border: 2px solid transparent;
+}
+
+.appliance-card:hover {
+    background: rgba(175, 16, 26, 0.04);
+}
+
+/* حالة الاختيار (active) */
+.appliance-card.selected {
+    border-color: rgba(175, 16, 26, 0.2);
+    background: rgba(175, 16, 26, 0.05);
+}
+
+/* الأيقونة داخل بطاقة الجهاز */
+.appliance-icon-wrapper {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    background: var(--color-surface-container-high);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+}
+
+.appliance-card:hover .appliance-icon-wrapper,
+.appliance-card.selected .appliance-icon-wrapper {
+    background: rgba(175, 16, 26, 0.1);
+}
+
+/* اسم الجهاز */
+.appliance-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+/* أدوات التحكم في العدد (+/-) */
+.qty-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+/* أزرار + و - */
+.qty-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: var(--color-surface-container-highest);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    line-height: 1;
+}
+
+.qty-btn:hover {
+    background: var(--color-primary);
+    color: white;
+}
+
+.qty-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.qty-btn:disabled:hover {
+    background: var(--color-surface-container-highest);
+    color: inherit;
+}
+
+/* رقم العدد */
+.qty-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+/* بطاقة إضافة جهاز مخصص (دائرية متقطعة) */
+.appliance-card-add {
+    border: 2px dashed var(--color-surface-container-highest);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 9rem;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.appliance-card-add:hover {
+    border-color: var(--color-primary);
+    background: rgba(175, 16, 26, 0.03);
+}
+
+/* ==========================================
+   2. شريط الإدخال المتحرك (Range Slider)
+   يُستخدم لتحديد ساعات التشغيل اليومية
+   ========================================== */
+.range-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 0.5rem;
+    background: var(--color-surface-container-high);
+    border-radius: 9999px;
+    outline: none;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+/* رأس الشريط المتحرك */
+.range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(175, 16, 26, 0.2);
+    transition: box-shadow var(--transition-fast);
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(175, 16, 26, 0.15);
+}
+
+/* ==========================================
+   3. بطاقة تحليل الاستهلاك (Results Card)
+   للباك اند: هذه البطاقة تُحدَّث ديناميكياً
+              باستخدام JavaScript عند تغيير
+              أي إدخال في الحاسبة
+   ========================================== */
+.results-card {
+    background: var(--color-surface-container-highest);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(25, 28, 30, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ضوء تزييني في الزاوية */
+.results-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8rem;
+    height: 8rem;
+    background: rgba(175, 16, 26, 0.1);
+    border-radius: 50%;
+    filter: blur(3rem);
+    transform: translate(50%, -50%);
+}
+
+/* شريط الحمل الكلي */
+.load-bar {
+    width: 100%;
+    height: 1rem;
+    background: white;
+    border-radius: 9999px;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.load-bar-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(to left, var(--color-primary), #4ade80); /* من أحمر لأخضر */
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* شبكة النتائج الصغيرة (الألواح، البطاريات) */
+.results-mini-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.results-mini-card {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+}
+
+/* الأرقام الكبيرة في النتائج */
+.results-big-number {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    display: block;
+}
+
+/* ==========================================
+   4. بطاقات الاقتراحات الذكية (AI Suggestions)
+   للباك اند: هذه البطاقات تعرض المنتجات
+              الموصى بها بناءً على نتائج الحساب
+              يجب أن تُجلب من API:
+              GET /api/products/recommend?kwh={X}
+   ========================================== */
+.suggestion-card {
+    background: var(--color-surface-container-lowest);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 2px solid rgba(175, 16, 26, 0.1);
+    box-shadow: 0 2px 8px rgba(25, 28, 30, 0.06);
+    transition: box-shadow var(--transition-fast);
+}
+
+.suggestion-card:hover {
+    box-shadow: 0 12px 24px rgba(25, 28, 30, 0.1);
+}
+
+/* بطاقة الاقتراح الثانوي */
+.suggestion-card-secondary {
+    background: var(--color-surface-container-lowest);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(228, 190, 186, 0.3);
+    box-shadow: 0 2px 8px rgba(25, 28, 30, 0.04);
+}
+
+/* زر تفاصيل النظام */
+.suggestion-primary-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    text-align: center;
+    display: block;
+    text-decoration: none;
+}
+
+.suggestion-primary-btn:hover {
+    background: var(--color-primary-container);
+}
+
+.suggestion-secondary-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface);
+    border: none;
+    border-radius: 0.75rem;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    text-align: center;
+    display: block;
+    text-decoration: none;
+}
+
+.suggestion-secondary-btn:hover {
+    background: var(--color-surface-container-highest);
+}
+
+/* ==========================================
+   5. قسم التحليل المرئي التفصيلي
+   ========================================== */
+.analysis-visual-section {
+    background: var(--color-surface-container-low);
+    padding-block: 5rem;
+}
+
+.analysis-image-frame {
+    background: var(--color-surface-container-lowest);
+    padding: 0.25rem;
+    border-radius: 1rem;
+    box-shadow: 0 40px 80px -20px rgba(25, 28, 30, 0.15);
+    overflow: hidden;
+    position: relative;
+}
+
+.analysis-image-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(175, 16, 26, 0.04), transparent);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.analysis-image-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    display: block;
+}
+
+/* قائمة مزايا الحاسبة */
+.analysis-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.analysis-feature-icon {
+    background: rgba(175, 16, 26, 0.1);
+    color: var(--color-primary);
+    border-radius: 50%;
+    padding: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   6. النافبار السفلي للهاتف
+   للباك اند: يُستخدم فقط على الهاتف (< 768px)
+   ========================================== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+}
+
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: block;
+    }
+}
+
+.mobile-bottom-nav-inner {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 20px 40px rgba(25, 28, 30, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.mobile-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8; /* slate-400 */
+    font-family: var(--font-main);
+    font-size: 0.6rem;
+    transition: color var(--transition-fast);
+}
+
+.mobile-nav-btn.active {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+/* ==========================================
+   7. حالة التحميل (Loading State)
+   للباك اند: تُعرض أثناء انتظار رد API
+   ========================================== */
+.loading-spinner {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid rgba(175, 16, 26, 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin-slow 0.8s linear infinite;
+}
+
+.skeleton-line {
+    background: linear-gradient(
+        90deg,
+        var(--color-surface-container-low) 25%,
+        var(--color-surface-container) 50%,
+        var(--color-surface-container-low) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 0.5rem;
+    height: 1rem;
+}
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==========================================
+   8. حالات الأخطاء والتحقق من الإدخال
+   للباك اند: تُستخدم عند التحقق من النموذج
+   ========================================== */
+.input-error {
+    border-color: var(--color-error) !important;
+    background: rgba(186, 26, 26, 0.05) !important;
+}
+
+.error-message {
+    color: var(--color-error, #ba1a1a);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.error-message.visible {
+    display: block;
+}

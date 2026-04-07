@@ -1,0 +1,513 @@
+/**
+ * ===================================================
+ * ملف: about.css
+ * الوصف: أنماط خاصة بصفحة "من نحن" (about.html)
+ *
+ * للباك اند:
+ * - الصفحة تحتوي على:
+ *   1. قسم القصة والبطولة
+ *   2. قسم القيم والرسالة
+ *   3. قسم الفريق
+ *   4. شهادات العملاء
+ *   5. نموذج التواصل + الخريطة
+ *
+ * نقاط API المتوقعة:
+ *   GET  /api/team           - جلب بيانات الفريق (الاسم، المنصب، الصورة)
+ *   GET  /api/testimonials   - جلب شهادات العملاء
+ *   POST /api/contact        - إرسال نموذج التواصل
+ *                             البيانات: {name, email, project_type, message}
+ * ===================================================
+ */
+
+/* ==========================================
+   1. قسم البطولة والقصة (Storytelling Hero)
+   ========================================== */
+.about-hero-section {
+    padding-inline: 1.5rem;
+    padding-block: 2rem 8rem;
+    max-width: 80rem;
+    margin-inline: auto;
+}
+
+/* شارة رابطة العمل */
+.about-badge {
+    display: inline-block;
+    color: var(--color-primary);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+/* عنوان البطولة */
+.about-hero-title {
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-on-surface);
+}
+
+/* صورة البطولة */
+.about-hero-image {
+    width: 100%;
+    height: 31rem;
+    object-fit: cover;
+    border-radius: 1rem;
+    display: block;
+
+    /* تأثير الإمالة الطفيفة */
+    transform: rotate(3deg);
+    transition: transform var(--transition-slow);
+    box-shadow: 0 40px 80px -20px rgba(25, 28, 30, 0.2);
+}
+
+.about-hero-image:hover {
+    transform: rotate(0deg);
+}
+
+/* بطاقة الإحصائية الصغيرة */
+.about-stat-card {
+    position: absolute;
+    bottom: -1.5rem;
+    right: -1.5rem;
+    background: var(--color-surface-container-lowest);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 40px rgba(25, 28, 30, 0.12);
+    display: none; /* مخفي على الهاتف */
+}
+
+@media (min-width: 768px) {
+    .about-stat-card {
+        display: block;
+    }
+}
+
+.about-stat-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+}
+
+/* ==========================================
+   2. قسم القيم (Values Section)
+   ========================================== */
+.values-section {
+    background: var(--color-surface-container-low);
+    padding-block: 8rem;
+    padding-inline: 1.5rem;
+}
+
+/* الفاصل الملون تحت عنوان القسم */
+.section-title-divider {
+    width: 5rem;
+    height: 0.375rem;
+    background: var(--color-primary);
+    border-radius: 9999px;
+    margin: 1rem auto 0;
+}
+
+/* بطاقة القيمة */
+.value-card {
+    background: var(--color-surface-container-lowest);
+    padding: 2.5rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: box-shadow var(--transition-normal);
+}
+
+.value-card:hover {
+    box-shadow: 0 30px 60px rgba(25, 28, 30, 0.12);
+}
+
+/* أيقونة القيمة */
+.value-icon-wrapper {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast);
+}
+
+.value-card:hover .value-icon-wrapper {
+    transform: scale(1.1);
+}
+
+/* بطاقة القيمة الرئيسية (ملونة بالأحمر) */
+.value-card-featured {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    padding: 2.5rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 20px 40px rgba(175, 16, 26, 0.25);
+}
+
+.value-card-featured .value-icon-wrapper {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.value-card-featured p {
+    opacity: 0.9;
+    line-height: 1.7;
+}
+
+/* ==========================================
+   3. قسم الفريق (Team Section)
+   للباك اند: بيانات الفريق تأتي من API
+              GET /api/team
+              الحقول: id, name, role, photo_url, linkedin_url (اختياري)
+   ========================================== */
+.team-section {
+    padding-block: 8rem;
+    padding-inline: 1.5rem;
+    max-width: 80rem;
+    margin-inline: auto;
+}
+
+/* بطاقة عضو الفريق */
+.team-member-card {
+    text-align: center;
+    position: relative;
+}
+
+/* صورة العضو */
+.team-member-image-wrapper {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: 8px solid var(--color-surface-container);
+    transition: border-color var(--transition-normal);
+}
+
+.team-member-card:hover .team-member-image-wrapper {
+    border-color: rgba(175, 16, 26, 0.2);
+}
+
+.team-member-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* اسم العضو */
+.team-member-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+/* منصب العضو */
+.team-member-role {
+    color: var(--color-primary);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* زر "انضم إلينا" */
+.join-team-btn {
+    border: 2px solid var(--color-outline-variant);
+    color: var(--color-primary);
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    font-family: var(--font-main);
+    font-weight: 700;
+    background: transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.join-team-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* ==========================================
+   4. قسم شهادات العملاء (Testimonials)
+   للباك اند: الشهادات تأتي من:
+              GET /api/testimonials
+              الحقول: id, quote, author_name, author_role, company
+   ========================================== */
+.testimonials-section {
+    background: var(--color-tertiary, #005f7b);
+    color: var(--color-on-tertiary-container, #e9f7ff);
+    padding-block: 8rem;
+    padding-inline: 1.5rem;
+}
+
+/* بطاقة الاقتباس */
+.testimonial-quote-card {
+    background: var(--color-surface-container-lowest);
+    color: var(--color-on-surface);
+    padding: 3rem;
+    border-radius: 1rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 10;
+}
+
+/* أيقونة الاقتباس الكبيرة */
+.testimonial-quote-icon {
+    position: absolute;
+    top: -2rem;
+    right: -1rem;
+    background: white;
+    border-radius: 9999px;
+    padding: 0.5rem;
+    color: var(--color-primary);
+    font-size: 3.75rem !important;
+}
+
+/* نص الاقتباس */
+.testimonial-quote-text {
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+/* صاحب الاقتباس */
+.testimonial-author-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--color-surface-container-high);
+    flex-shrink: 0;
+}
+
+/* الظل الخلفي للبطاقة (عنصر زخرفي) */
+.testimonial-card-shadow {
+    position: absolute;
+    bottom: -1.5rem;
+    left: -1.5rem;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    transform: rotate(-2deg);
+    z-index: -1;
+}
+
+/* عنوان قسم الشهادات */
+.testimonials-heading {
+    color: var(--color-tertiary-fixed, #bee9ff);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+/* ==========================================
+   5. قسم التواصل ونموذج الاتصال
+   للباك اند: النموذج يُرسل إلى:
+              POST /api/contact
+              الحقول: name, email, project_type, message
+              الاستجابة: { success: true, message: "..." }
+   ========================================== */
+.contact-section {
+    padding-block: 8rem;
+    padding-inline: 1.5rem;
+}
+
+/* حاوية نموذج التواصل */
+.contact-form-card {
+    background: var(--color-surface-container-lowest);
+    border-radius: 1rem;
+    padding: 3rem;
+    box-shadow: var(--shadow-card);
+}
+
+/* عنوان النموذج */
+.contact-form-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+/* مجموعة حقل الإدخال */
+.form-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* تسمية الحقل */
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    padding-inline: 0.5rem;
+}
+
+/* حقل الإدخال */
+.form-input {
+    width: 100%;
+    background: var(--color-surface-container-low);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    color: var(--color-on-surface);
+    outline: none;
+    transition: box-shadow var(--transition-fast);
+}
+
+.form-input:focus {
+    box-shadow: 0 0 0 3px rgba(175, 16, 26, 0.2);
+}
+
+/* منطقة النص الحر */
+.form-textarea {
+    resize: vertical;
+    min-height: 7rem;
+}
+
+/* قائمة منسدلة */
+.form-select {
+    width: 100%;
+    background: var(--color-surface-container-low);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    color: var(--color-on-surface);
+    outline: none;
+    cursor: pointer;
+    transition: box-shadow var(--transition-fast);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.form-select:focus {
+    box-shadow: 0 0 0 3px rgba(175, 16, 26, 0.2);
+}
+
+/* زر إرسال النموذج */
+.form-submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-family: var(--font-main);
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.form-submit-btn:hover {
+    box-shadow: 0 12px 24px rgba(175, 16, 26, 0.25);
+}
+
+.form-submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* رسالة نجاح الإرسال */
+.success-message {
+    display: none;
+    background: rgba(0, 95, 123, 0.1);
+    color: var(--color-tertiary);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.success-message.visible {
+    display: block;
+}
+
+/* ==========================================
+   6. بطاقات معلومات الاتصال
+   ========================================== */
+.contact-info-card {
+    background: var(--color-surface-container-high);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* أيقونة الاتصال */
+.contact-info-icon {
+    width: 3rem;
+    height: 3rem;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   7. بطاقة الخريطة
+   للباك اند: يمكن استبدال الصورة
+              بخريطة Google Maps حقيقية
+              عبر Google Maps Embed API
+   ========================================== */
+.map-card {
+    height: 25rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-card);
+}
+
+.map-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* طبقة تزيينية فوق الخريطة */
+.map-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(175, 16, 26, 0.08);
+    pointer-events: none;
+    transition: background var(--transition-normal);
+}
+
+.map-card:hover .map-overlay {
+    background: transparent;
+}
+
+/* بطاقة عنوان المقر */
+.map-address-card {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    left: 1.5rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(25, 28, 30, 0.15);
+}

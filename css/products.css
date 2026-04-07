@@ -1,0 +1,330 @@
+/**
+ * ===================================================
+ * ملف: products.css
+ * الوصف: أنماط خاصة بصفحة المنتجات (products.html)
+ *
+ * للباك اند:
+ * - صفحة المنتجات تعرض:
+ *   1. شبكة Bento Grid للمنتجات الرئيسية
+ *   2. بطاقات المنتجات الفردية مع الأسعار
+ *   3. مقارنة الباقات (3 باقات: أساسية، متكاملة، منشآت)
+ *   4. قسم CTA للتحويل
+ *
+ * نقاط API المتوقعة من الباك اند:
+ *   GET /api/products       - جلب المنتجات
+ *   GET /api/bundles        - جلب الباقات
+ *   POST /api/quote-request - طلب عرض سعر
+ * ===================================================
+ */
+
+/* ==========================================
+   1. تصفية الفئات (Category Filter)
+   للباك اند: عند الضغط على زر الفئة يُرسل
+              طلب لواجهة API لتصفية المنتجات
+   ========================================== */
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+}
+
+/* زر الفئة النشط */
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-container));
+    color: white;
+    box-shadow: 0 8px 20px rgba(175, 16, 26, 0.25);
+}
+
+/* زر الفئة الغير نشط */
+.filter-btn.inactive {
+    background: white;
+    color: var(--color-secondary);
+}
+
+.filter-btn.inactive:hover {
+    background: var(--color-surface-container-high);
+}
+
+/* ==========================================
+   2. شبكة المنتجات الرئيسية (Bento Grid)
+   للباك اند: المنتج الرئيسي يأخذ 8 أعمدة
+              المنتجات الجانبية تأخذ 4 أعمدة
+   ========================================== */
+
+/* البطاقة الرئيسية المميزة */
+.product-featured {
+    background: var(--color-surface-container-lowest);
+    border-radius: 1rem;
+    padding: 2rem;
+    overflow: hidden;
+    position: relative;
+}
+
+/* صورة المنتج المميز */
+.product-featured-image {
+    width: 100%;
+    height: 25rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.product-featured-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s ease;
+}
+
+.product-featured:hover .product-featured-image img {
+    transform: scale(1.05);
+}
+
+/* شارة "Premium Choice" */
+.badge-premium {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border-radius: 9999px;
+    background: var(--color-tertiary-container, #00799c);
+    color: var(--color-on-tertiary-container, #e9f7ff);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* قائمة مزايا المنتج */
+.product-features-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-block: 1.5rem;
+}
+
+.product-features-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+}
+
+/* البطاقات الجانبية الصغيرة */
+.product-side-card {
+    background: var(--color-surface-container-lowest);
+    border-radius: 1rem;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+/* صورة البطاقة الجانبية */
+.product-side-image {
+    width: 100%;
+    height: 12rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.product-side-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-side-card:hover .product-side-image img {
+    transform: scale(1.05);
+}
+
+/* سعر المنتج */
+.product-price {
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* ==========================================
+   3. قسم مقارنة الباقات (Bundles Comparison)
+   للباك اند: الأسعار والمحتويات يجب أن تأتي
+              من قاعدة البيانات عبر API
+   ========================================== */
+.bundles-section {
+    padding-block: 5rem;
+    padding-inline: 2rem;
+    background: var(--color-surface-container-low);
+    border-radius: 1rem;
+}
+
+/* شبكة الباقات الثلاثة */
+.bundles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .bundles-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* بطاقة الباقة */
+.bundle-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(25, 28, 30, 0.06);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* خط علوي ملون للباقة */
+.bundle-card-basic    { border-top: 8px solid #cbd5e1; }  /* slate-300 */
+.bundle-card-featured { border-top: 8px solid var(--color-primary); }
+.bundle-card-commercial { border-top: 8px solid #cbd5e1; }
+
+/* الباقة الأكثر مبيعاً - تُبرز أكثر */
+.bundle-card-featured {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(175, 16, 26, 0.12);
+    position: relative;
+    z-index: 10;
+}
+
+/* شارة "الأكثر مبيعاً" */
+.bundle-best-badge {
+    position: absolute;
+    top: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-primary);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 1rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+}
+
+/* سعر الباقة */
+.bundle-price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-block: 2rem;
+}
+
+/* قائمة محتويات الباقة */
+.bundle-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex: 1;
+}
+
+.bundle-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+}
+
+/* أزرار الطلب */
+.bundle-btn-outline {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 9999px;
+    border: 2px solid #e2e8f0;
+    background: transparent;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.bundle-btn-outline:hover {
+    background: #f8fafc;
+}
+
+.bundle-btn-primary {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 9999px;
+    border: none;
+    background: var(--color-primary);
+    color: white;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(175, 16, 26, 0.3);
+    transition: transform var(--transition-fast);
+}
+
+.bundle-btn-primary:hover {
+    transform: scale(1.03);
+}
+
+.bundle-btn-primary:active {
+    transform: scale(0.97);
+}
+
+/* ==========================================
+   4. قسم CTA الختامي
+   ========================================== */
+.products-cta-section {
+    margin-top: 6rem;
+    background: linear-gradient(135deg,
+        var(--color-primary),
+        var(--color-primary-container));
+    border-radius: 1rem;
+    padding: 3rem;
+    text-align: center;
+    color: white;
+    overflow: hidden;
+    position: relative;
+}
+
+/* دائرة زخرفية */
+.products-cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16rem;
+    height: 16rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    filter: blur(3rem);
+}
+
+/* ==========================================
+   5. تحسينات للهاتف
+   ========================================== */
+@media (max-width: 768px) {
+    /* منع تكدس الباقات المميزة */
+    .bundle-card-featured {
+        transform: none;
+    }
+
+    .bundle-best-badge {
+        top: -0.75rem;
+    }
+}

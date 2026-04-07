@@ -1,0 +1,971 @@
+/**
+ * ===================================================
+ * ملف: admin.css
+ * الوصف: أنماط لوحة التحكم الإدارية (Dashboard)
+ *
+ * للباك اند:
+ * - هذا الملف مشترك بين login.html و dashboard.html
+ * - لا علاقة له بالموقع العام، فقط للمشرفين
+ * - يُضاف عليه حماية من الجلسة في Laravel:
+ *   middleware: ['auth', 'admin']
+ * ===================================================
+ */
+
+/* ==========================================
+   1. متغيرات لوحة التحكم
+   ========================================== */
+:root {
+    --admin-primary:        #af101a;
+    --admin-primary-dark:   #8a0c15;
+    --admin-primary-light:  rgba(175, 16, 26, 0.08);
+    --admin-sidebar-bg:     #0f1117;
+    --admin-sidebar-width:  260px;
+    --admin-header-h:       64px;
+    --admin-bg:             #f4f6f9;
+    --admin-card-bg:        #ffffff;
+    --admin-border:         #e5e9f0;
+    --admin-text:           #1a1d23;
+    --admin-text-muted:     #6b7280;
+    --admin-text-light:     #9ca3af;
+    --admin-success:        #10b981;
+    --admin-warning:        #f59e0b;
+    --admin-danger:         #ef4444;
+    --admin-info:           #3b82f6;
+    --admin-shadow:         0 1px 4px rgba(0,0,0,0.08);
+    --admin-shadow-md:      0 4px 16px rgba(0,0,0,0.10);
+    --admin-shadow-lg:      0 8px 32px rgba(0,0,0,0.12);
+    --admin-radius:         0.75rem;
+    --admin-radius-sm:      0.5rem;
+    --admin-transition:     200ms ease;
+}
+
+/* ==========================================
+   2. Reset & Base
+   ========================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; direction: rtl; }
+
+body.admin-body {
+    font-family: 'IBM Plex Sans Arabic', 'Manrope', -apple-system, sans-serif;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   3. LAYOUT - الشريط الجانبي + المحتوى
+   ========================================== */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ==========================================
+   4. الشريط الجانبي (Sidebar)
+   للباك اند: الروابط تُفعَّل بناءً على
+              current_route من Laravel
+   ========================================== */
+.admin-sidebar {
+    width: var(--admin-sidebar-width);
+    background: var(--admin-sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    transition: transform var(--admin-transition);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* تمرير سلس للشريط الجانبي */
+.admin-sidebar::-webkit-scrollbar { width: 4px; }
+.admin-sidebar::-webkit-scrollbar-track { background: transparent; }
+.admin-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* شعار الشريط الجانبي */
+.admin-sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    text-decoration: none;
+}
+
+.admin-sidebar-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--admin-primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-sidebar-logo-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.admin-sidebar-logo-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.admin-sidebar-logo-sub {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    white-space: nowrap;
+}
+
+/* قسم التنقل */
+.admin-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+/* عنوان قسم */
+.admin-nav-section-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.25);
+    padding: 1rem 1.25rem 0.4rem;
+}
+
+/* رابط التنقل */
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1.25rem;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0;
+    transition: background var(--admin-transition), color var(--admin-transition);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: right;
+    position: relative;
+}
+
+.admin-nav-link:hover {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.85);
+}
+
+/* الرابط النشط */
+.admin-nav-link.active {
+    background: var(--admin-primary-light);
+    color: #fff;
+    font-weight: 600;
+}
+
+.admin-nav-link.active::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--admin-primary);
+    border-radius: 0 0 0 3px;
+}
+
+.admin-nav-link .material-symbols-outlined {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.admin-nav-link.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    color: var(--admin-primary);
+}
+
+/* Badge على الرابط (عدد الرسائل مثلاً) */
+.admin-nav-badge {
+    margin-right: auto;
+    background: var(--admin-primary);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* أسفل الشريط الجانبي */
+.admin-sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.admin-user-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--admin-radius-sm);
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: background var(--admin-transition);
+}
+
+.admin-user-card:hover { background: rgba(255,255,255,0.08); }
+
+.admin-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--admin-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.admin-user-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-user-role {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
+}
+
+/* ==========================================
+   5. منطقة المحتوى الرئيسية
+   ========================================== */
+.admin-content {
+    flex: 1;
+    margin-right: var(--admin-sidebar-width);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ==========================================
+   6. الهيدر العلوي (Topbar)
+   ========================================== */
+.admin-topbar {
+    height: var(--admin-header-h);
+    background: var(--admin-card-bg);
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--admin-shadow);
+}
+
+.admin-topbar-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+
+.admin-topbar-breadcrumb {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 1px;
+}
+
+.admin-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* أيقونة إشعارات */
+.admin-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--admin-radius-sm);
+    border: 1px solid var(--admin-border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--admin-text-muted);
+    transition: all var(--admin-transition);
+    position: relative;
+}
+
+.admin-icon-btn:hover {
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+    background: var(--admin-primary-light);
+}
+
+.admin-icon-btn .material-symbols-outlined { font-size: 1.1rem; }
+
+/* نقطة الإشعار */
+.notification-dot {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 8px;
+    height: 8px;
+    background: var(--admin-danger);
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* زر المشرف في التوب بار */
+.admin-topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--admin-radius-sm);
+    border: 1px solid var(--admin-border);
+    cursor: pointer;
+    transition: all var(--admin-transition);
+    background: transparent;
+}
+
+.admin-topbar-user:hover { border-color: var(--admin-primary); background: var(--admin-primary-light); }
+
+/* ==========================================
+   7. محتوى الصفحة الرئيسية
+   ========================================== */
+.admin-page {
+    flex: 1;
+    padding: 1.5rem;
+    display: none; /* مخفي افتراضياً */
+}
+
+.admin-page.active { display: block; animation: pageFadeIn 0.25s ease; }
+
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* عنوان الصفحة */
+.admin-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.admin-page-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* ==========================================
+   8. بطاقات الإحصائيات (Stats Cards)
+   للباك اند: الأرقام تُجلب من:
+              GET /api/admin/stats
+   ========================================== */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-stat-card {
+    background: var(--admin-card-bg);
+    border-radius: var(--admin-radius);
+    padding: 1.25rem;
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: box-shadow var(--admin-transition), transform var(--admin-transition);
+}
+
+.admin-stat-card:hover {
+    box-shadow: var(--admin-shadow-md);
+    transform: translateY(-2px);
+}
+
+.admin-stat-info {}
+
+.admin-stat-label {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+}
+
+.admin-stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--admin-text);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+}
+
+.admin-stat-change {
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.admin-stat-change.up   { color: var(--admin-success); }
+.admin-stat-change.down { color: var(--admin-danger); }
+
+.admin-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--admin-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-stat-icon .material-symbols-outlined { font-size: 1.3rem; }
+
+/* ألوان أيقونات الإحصائيات */
+.stat-icon-red    { background: rgba(175,16,26,0.1);  color: var(--admin-primary); }
+.stat-icon-green  { background: rgba(16,185,129,0.1); color: var(--admin-success); }
+.stat-icon-blue   { background: rgba(59,130,246,0.1); color: var(--admin-info); }
+.stat-icon-orange { background: rgba(245,158,11,0.1); color: var(--admin-warning); }
+
+/* ==========================================
+   9. البطاقة العامة (Card)
+   ========================================== */
+.admin-card {
+    background: var(--admin-card-bg);
+    border-radius: var(--admin-radius);
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow);
+    overflow: hidden;
+}
+
+.admin-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--admin-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-card-title .material-symbols-outlined {
+    font-size: 1rem;
+    color: var(--admin-primary);
+}
+
+.admin-card-body { padding: 1.25rem; }
+
+/* ==========================================
+   10. الجداول (Tables)
+   للباك اند: البيانات تُجلب من API
+              وتُرسم ديناميكياً بـ JS
+   ========================================== */
+.admin-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.admin-table th {
+    padding: 0.75rem 1rem;
+    text-align: right;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+    background: #f8fafc;
+    border-bottom: 1px solid var(--admin-border);
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    color: var(--admin-text);
+    vertical-align: middle;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+
+.admin-table tbody tr {
+    transition: background var(--admin-transition);
+    cursor: default;
+}
+
+.admin-table tbody tr:hover { background: #f8fafc; }
+
+/* خلية الصورة المصغرة */
+.table-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--admin-radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--admin-border);
+}
+
+/* ==========================================
+   11. الأزرار (Admin Buttons)
+   ========================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--admin-radius-sm);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all var(--admin-transition);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn .material-symbols-outlined { font-size: 0.95rem; }
+
+.btn-primary-admin {
+    background: var(--admin-primary);
+    color: white;
+    border-color: var(--admin-primary);
+}
+
+.btn-primary-admin:hover {
+    background: var(--admin-primary-dark);
+    border-color: var(--admin-primary-dark);
+    box-shadow: 0 4px 12px rgba(175,16,26,0.3);
+}
+
+.btn-outline-admin {
+    background: transparent;
+    color: var(--admin-text-muted);
+    border-color: var(--admin-border);
+}
+
+.btn-outline-admin:hover {
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+    background: var(--admin-primary-light);
+}
+
+.btn-danger {
+    background: rgba(239,68,68,0.1);
+    color: var(--admin-danger);
+    border-color: rgba(239,68,68,0.2);
+}
+
+.btn-danger:hover {
+    background: var(--admin-danger);
+    color: white;
+}
+
+.btn-success {
+    background: rgba(16,185,129,0.1);
+    color: var(--admin-success);
+    border-color: rgba(16,185,129,0.2);
+}
+
+.btn-success:hover { background: var(--admin-success); color: white; }
+
+.btn-sm { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
+.btn-lg { padding: 0.7rem 1.5rem; font-size: 0.9rem; }
+
+/* ==========================================
+   12. الشارات (Badges)
+   ========================================== */
+.admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.badge-active    { background: rgba(16,185,129,0.1);  color: var(--admin-success); }
+.badge-inactive  { background: rgba(107,114,128,0.1); color: var(--admin-text-muted); }
+.badge-new       { background: rgba(175,16,26,0.1);   color: var(--admin-primary); }
+.badge-featured  { background: rgba(245,158,11,0.1);  color: var(--admin-warning); }
+.badge-pending   { background: rgba(59,130,246,0.1);  color: var(--admin-info); }
+
+/* ==========================================
+   13. حقول الإدخال (Form Inputs)
+   ========================================== */
+.admin-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.admin-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-text);
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea {
+    width: 100%;
+    padding: 0.6rem 0.875rem;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-sm);
+    background: white;
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: var(--admin-text);
+    outline: none;
+    transition: border-color var(--admin-transition), box-shadow var(--admin-transition);
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(175,16,26,0.1);
+}
+
+.admin-textarea { resize: vertical; min-height: 90px; }
+
+/* ==========================================
+   14. المودال (Modal)
+   للباك اند: المودال يُستخدم لإضافة/تعديل
+              البيانات دون الخروج من الصفحة
+   ========================================== */
+.admin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--admin-transition);
+}
+
+.admin-modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.admin-modal {
+    background: white;
+    border-radius: var(--admin-radius);
+    box-shadow: var(--admin-shadow-lg);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(16px) scale(0.98);
+    transition: transform var(--admin-transition);
+}
+
+.admin-modal-overlay.open .admin-modal {
+    transform: translateY(0) scale(1);
+}
+
+.admin-modal-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.admin-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--admin-radius-sm);
+    border: 1px solid var(--admin-border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--admin-transition);
+}
+
+.admin-modal-close:hover { background: var(--admin-danger); border-color: var(--admin-danger); color: white; }
+
+.admin-modal-body  { padding: 1.25rem; }
+.admin-modal-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--admin-border);
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.75rem;
+}
+
+/* ==========================================
+   15. البحث والفلاتر
+   ========================================== */
+.admin-search-bar {
+    position: relative;
+    flex: 1;
+    max-width: 280px;
+}
+
+.admin-search-bar .material-symbols-outlined {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--admin-text-muted);
+    pointer-events: none;
+}
+
+.admin-search-input {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 0.875rem;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-sm);
+    background: white;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--admin-text);
+    outline: none;
+    transition: border-color var(--admin-transition);
+}
+
+.admin-search-input:focus { border-color: var(--admin-primary); }
+
+/* ==========================================
+   16. Empty State
+   ========================================== */
+.admin-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--admin-text-muted);
+}
+
+.admin-empty-state .material-symbols-outlined {
+    font-size: 3rem;
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+/* ==========================================
+   17. Loading Skeleton
+   ========================================== */
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+/* ==========================================
+   18. الاستجابة للهاتف (Responsive)
+   ========================================== */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        transform: translateX(100%);
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .admin-content {
+        margin-right: 0;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-page { padding: 1rem; }
+    .admin-card-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ==========================================
+   19. الإشعارات (Toast Notifications)
+   للباك اند: تُطلق بعد نجاح/فشل عمليات CRUD
+   ========================================== */
+.admin-toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.125rem;
+    background: white;
+    border-radius: var(--admin-radius-sm);
+    box-shadow: var(--admin-shadow-lg);
+    border-right: 4px solid;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 260px;
+    animation: toastIn 0.3s ease forwards;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.admin-toast.success { border-color: var(--admin-success); }
+.admin-toast.error   { border-color: var(--admin-danger); }
+.admin-toast.warning { border-color: var(--admin-warning); }
+.admin-toast.info    { border-color: var(--admin-info); }
+
+.admin-toast .material-symbols-outlined { font-size: 1.1rem; flex-shrink: 0; }
+.admin-toast.success .material-symbols-outlined { color: var(--admin-success); }
+.admin-toast.error   .material-symbols-outlined { color: var(--admin-danger); }
+
+/* ==========================================
+   20. Switch Toggle
+   ========================================== */
+.admin-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 0.6rem;
+    user-select: none;
+}
+
+.admin-switch input { display: none; }
+
+.admin-switch-track {
+    width: 40px;
+    height: 22px;
+    background: var(--admin-border);
+    border-radius: 9999px;
+    position: relative;
+    transition: background var(--admin-transition);
+    flex-shrink: 0;
+}
+
+.admin-switch-thumb {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform var(--admin-transition);
+}
+
+.admin-switch input:checked + .admin-switch-track { background: var(--admin-primary); }
+.admin-switch input:checked + .admin-switch-track .admin-switch-thumb {
+    transform: translateX(-18px);
+}
+
+.admin-switch-label { font-size: 0.8rem; font-weight: 500; color: var(--admin-text); }
+
+/* ==========================================
+   21. Progress Bar
+   ========================================== */
+.admin-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--admin-border);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.admin-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: var(--admin-primary);
+    transition: width 0.8s ease;
+}
+
+/* ==========================================
+   22. Divider
+   ========================================== */
+.admin-divider {
+    height: 1px;
+    background: var(--admin-border);
+    margin-block: 1rem;
+}

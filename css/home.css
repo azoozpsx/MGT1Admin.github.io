@@ -1,0 +1,334 @@
+/**
+ * ===================================================
+ * ملف: home.css
+ * الوصف: أنماط خاصة بالصفحة الرئيسية (index.html)
+ *
+ * للباك اند:
+ * - تُستخدم هذه الأنماط في الصفحة الرئيسية فقط
+ * - الصفحة الرئيسية تحتوي على:
+ *   * قسم البطولة (Hero)
+ *   * قسم المزايا (Benefits - Bento Grid)
+ *   * عرض المنتجات (Product Showcase)
+ *   * دعوة للحاسبة (Calculator CTA)
+ * ===================================================
+ */
+
+/* ==========================================
+   1. قسم البطولة (Hero Section)
+   ========================================== */
+
+/* حاوية البطولة الرئيسية */
+.hero-section {
+    position: relative;
+    padding-top: 8rem;   /* مسافة فوق الـ navbar الثابت */
+    padding-bottom: 5rem;
+    padding-inline: 1.5rem;
+    overflow: hidden;
+}
+
+/* خلفية أشعة الشمس المتدرجة */
+.hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at 85% 15%,
+        rgba(175, 16, 26, 0.06) 0%,
+        transparent 55%
+    );
+    z-index: -1;
+}
+
+/* العنوان الرئيسي */
+.hero-title {
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+}
+
+/* الفقرة التعريفية */
+.hero-description {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: #4c616c;
+    max-width: 42rem;
+    margin-bottom: 2.5rem;
+}
+
+/* الصورة البطولية */
+.hero-image-wrapper {
+    position: relative;
+    z-index: 10;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -20px rgba(25, 28, 30, 0.2);
+}
+
+.hero-image-wrapper img {
+    width: 100%;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+    display: block;
+}
+
+/* بطاقة الكفاءة الزجاجية فوق الصورة */
+.efficiency-card {
+    position: absolute;
+    bottom: -1.5rem;
+    right: -1.5rem;
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(25, 28, 30, 0.12);
+    max-width: 18rem;
+}
+
+/* شريط الكفاءة */
+.efficiency-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: var(--color-surface-container-high);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.efficiency-bar-fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 9999px;
+}
+
+/* ==========================================
+   2. قسم المزايا (Benefits Section)
+   القسم الذي يعرض: استدامة حقيقية، ضمان ممتد، دقة التنفيذ
+   ========================================== */
+.benefits-section {
+    padding-block: 6rem;
+    padding-inline: 1.5rem;
+    background-color: var(--color-surface-container-low);
+}
+
+/* بطاقة الميزة الكبيرة */
+.benefit-card-large {
+    grid-column: span 2;
+    background: var(--color-surface-container-lowest);
+    padding: 2.5rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.3s ease;
+}
+
+.benefit-card-large:hover {
+    box-shadow: 0 30px 60px rgba(25, 28, 30, 0.12);
+}
+
+/* البطاقات الصغيرة للمزايا */
+.benefit-card {
+    background: var(--color-surface-container-lowest);
+    padding: 2.5rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.3s ease;
+}
+
+.benefit-card:hover {
+    box-shadow: 0 30px 60px rgba(25, 28, 30, 0.12);
+}
+
+/* أيقونة الميزة */
+.benefit-icon-wrapper {
+    width: fit-content;
+    padding: 1rem;
+    border-radius: 9999px;
+    margin-bottom: 2rem;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* تغيير الأيقونة عند تحويم الماوس */
+.benefit-card:hover .benefit-icon-wrapper,
+.benefit-card-large:hover .benefit-icon-wrapper {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* ==========================================
+   3. قسم عرض المنتجات (Product Showcase)
+   الثلاثة منتجات: ألواح، بطاريات، محولات
+   ========================================== */
+.products-showcase-section {
+    padding-block: 6rem;
+    padding-inline: 1.5rem;
+}
+
+/* بطاقة المنتج */
+.product-card {
+    position: relative;
+    background: var(--color-surface);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* حاوية صورة المنتج */
+.product-card-image {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--color-surface-container-high);
+}
+
+.product-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+/* تكبير الصورة عند التحويم */
+.product-card:hover .product-card-image img {
+    transform: scale(1.1);
+}
+
+/* محتوى بطاقة المنتج */
+.product-card-body {
+    padding: 2rem;
+}
+
+/* زر "استكشف المواصفات" */
+.product-explore-btn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-outline-variant);
+    background: transparent;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.product-explore-btn:hover {
+    background: var(--color-on-surface);
+    color: var(--color-surface);
+}
+
+/* ==========================================
+   4. قسم دعوة للحاسبة (Calculator CTA)
+   ========================================== */
+.calculator-cta-section {
+    padding-block: 5rem;
+    padding-inline: 1.5rem;
+}
+
+.calculator-cta-box {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .calculator-cta-box {
+        flex-direction: row;
+    }
+}
+
+.calculator-cta-content {
+    padding: 3rem 5rem;
+    flex: 3;
+}
+
+.calculator-cta-image {
+    flex: 2;
+    position: relative;
+    min-height: 18rem;
+}
+
+.calculator-cta-image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+}
+
+/* طبقة التدرج فوق الصورة */
+.calculator-cta-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to left, transparent, var(--color-primary));
+}
+
+/* حقل البريد الإلكتروني */
+.cta-email-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    color: white;
+    font-family: var(--font-main);
+    outline: none;
+    flex-grow: 1;
+    min-width: 0;
+    transition: border-color var(--transition-fast);
+}
+
+.cta-email-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cta-email-input:focus {
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* زر بدء الحساب */
+.cta-submit-btn {
+    background: white;
+    color: var(--color-primary);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem 2.5rem;
+    font-family: var(--font-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    white-space: nowrap;
+}
+
+.cta-submit-btn:hover {
+    background: var(--color-on-primary-container, #fff2f0);
+}
+
+/* ==========================================
+   5. الإحصائيات والأرقام
+   ========================================== */
+.stat-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--color-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #4c616c;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
